@@ -11,5 +11,5 @@ export const handleUncaughtError = () => {
   process.on("uncaughtException", (err) => {
     console.log(`Error: ${err}`);
     console.log("shutting down server bcz of uncaughtException");
-  });
+  }); 
 };
