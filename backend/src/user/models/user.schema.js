@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre("save", async function (next) {
   //  hash user password before saving using bcrypt
+  if (!this.isModified("password")) {
+    next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
 // JWT Token

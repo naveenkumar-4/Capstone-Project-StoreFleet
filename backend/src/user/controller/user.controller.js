@@ -21,7 +21,6 @@ export const createNewUser = async (req, res, next) => {
   try {
     const newUser = await createNewUserRepo(req.body);
     await sendToken(newUser, res, 200);
-
     // Implement sendWelcomeEmail function to send welcome message
     await sendWelcomeEmail(newUser);
   } catch (err) {
@@ -64,10 +63,77 @@ export const logoutUser = async (req, res, next) => {
 
 export const forgetPassword = async (req, res, next) => {
   // Implement feature for forget password
+  const { email } = req.body;
+  try {
+    const user = await findUserRepo({ email });
+    if (!user) {
+      return next(new ErrorHandler(404, "User not found with this email"));
+    }
+
+    const resetToken = await user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    const resetPasswordUrl = `${req.protocol}://${req.get(
+      "host"
+    )}/api/v1/password/reset/${resetToken}`;
+
+    const message = `Your password reset token is: \n\n ${resetPasswordUrl} \n\nIf you have not requested this email, then ignore it.`;
+
+    try {
+      await sendPasswordResetEmail({
+        email: user.email,
+        subject: "Password Recovery",
+        message,
+      });
+
+      res.status(200).json({
+        success: true,
+        message: `Email sent to ${user.email} successfully`,
+      });
+    } catch (error) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+
+      await user.save({ validateBeforeSave: false });
+
+      return next(new ErrorHandler(500, error.message));
+    }
+  } catch (error) {
+    return next(new ErrorHandler(500, error));
+  }
 };
 
 export const resetUserPassword = async (req, res, next) => {
-  // Implement feature for reset password
+  // Implement feature for reset
+  const resetPasswordToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  try {
+    const user = await findUserForPasswordResetRepo(resetPasswordToken);
+    if (!user) {
+      return next(
+        new ErrorHandler(
+          400,
+          "Reset Password Token is invalid or has been expired"
+        )
+      );
+    }
+
+    if (req.body.password !== req.body.confirmPassword) {
+      return next(new ErrorHandler(400, "Password does not password"));
+    }
+
+    user.password = req.body.password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+
+    await user.save();
+    await sendToken(user, res, 200);
+  } catch (error) {
+    return next(new ErrorHandler(500, error));
+  }
 };
 
 export const getUserDetails = async (req, res, next) => {
@@ -162,4 +228,20 @@ export const deleteUser = async (req, res, next) => {
 
 export const updateUserProfileAndRole = async (req, res, next) => {
   // Write your code here for updating the roles of other users by admin
+  try {
+    const { name, email, role } = req.body;
+    const updatedUser = await updateUserRoleAndProfileRepo(req.params.id, {
+      name,
+      email,
+      role,
+    });
+
+    if (!updatedUser) {
+      return next(new ErrorHandler(400, "User not found!"));
+    }
+
+    res.status(200).json({ success: true, updatedUser });
+  } catch (error) {
+    return next(new ErrorHandler(400, error));
+  }
 };

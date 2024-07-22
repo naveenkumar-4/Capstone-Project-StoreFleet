@@ -187,6 +187,13 @@ export const deleteReview = async (req, res, next) => {
     const reviewToBeDeleted = reviews[isReviewExistIndex];
     reviews.splice(isReviewExistIndex, 1);
 
+    // Recalculate product rating
+    let avgRating = 0;
+    reviews.forEach((rev) => {
+      avgRating += rev.rating;
+    });
+    product.rating = reviews.length === 0 ? 0 : avgRating / reviews.length;
+
     await product.save({ validateBeforeSave: false });
     res.status(200).json({
       success: true,
