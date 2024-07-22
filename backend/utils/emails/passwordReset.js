@@ -7,7 +7,7 @@ export const sendPasswordResetEmail = async (user, resetPasswordURL) => {
       user: process.env.STORFLEET_SMPT_MAIL,
       pass: process.env.STORFLEET_SMPT_MAIL_PASSWORD,
     },
-  });
+  }); 
 
   const mailOptions = {
     from: process.env.STORFLEET_MAIL,
