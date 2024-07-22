@@ -10,7 +10,7 @@ export const getAllProductsRepo = async () => {
 
 export const updateProductRepo = async (_id, updatedData) => {
   return await ProductModel.findByIdAndUpdate(_id, updatedData, {
-    new: true,
+    new: true, 
     runValidators: true,
     useFindAndModify: true,
   });

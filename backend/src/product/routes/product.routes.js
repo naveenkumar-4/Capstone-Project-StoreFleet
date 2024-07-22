@@ -23,7 +23,7 @@ router.route("/reviews/:id").get(getAllReviewsOfAProduct);
 router.route("/add").post(auth, authByUserRole("admin"), addNewProduct);
 router.route("/update/:id").put(auth, authByUserRole("admin"), updateProduct);
 
-// DELETE ROUTE
+// DELETE ROUTE 
 // Admin only
 router
   .route("/delete/:id")

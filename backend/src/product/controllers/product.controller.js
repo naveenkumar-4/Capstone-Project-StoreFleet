@@ -31,6 +31,39 @@ export const addNewProduct = async (req, res, next) => {
 
 export const getAllProducts = async (req, res, next) => {
   // Implement the functionality for search, filter and pagination this function.
+  try {
+    const { keyword, category, page = 1, limit = 10 } = req.query;
+
+    // Create a query object for search and filter
+    let query = {};
+    if (keyword) {
+      query.name = { $regex: keyword, $options: "i" };
+    }
+    if (category) {
+      query.category = category;
+    }
+
+    // pagination setup
+    const skip = (page - 1) * limit;
+
+    // Execute query with pagination
+    const products = await ProductModel.find(query)
+      .skip(skip)
+      .limit(parseInt(limit));
+
+    // Get total count for pagination
+    const totalProducts = await ProductModel.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      products,
+      totalProducts,
+      page,
+      totalPages: Math.ceil(totalProducts / limit),
+    });
+  } catch (err) {
+    return next(new ErrorHandler(400, err.message));
+  }
 };
 
 export const updateProduct = async (req, res, next) => {

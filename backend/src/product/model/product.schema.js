@@ -100,7 +100,7 @@ const producSchema = new mongoose.Schema(
       default: Date.now(),
     },
   },
-  timeStamp
+  timeStamp 
 );
 
 const ProductModel = mongoose.model("Product", producSchema);
