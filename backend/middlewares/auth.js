@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import jwt from "jsonwebtoken";
 import { ErrorHandler } from "../utils/errorHandler.js";
 import UserModel from "../src/user/models/user.schema.js";

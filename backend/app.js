@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+dotenv.config()
 import path from "path";
 import productRoutes from "./src/product/routes/product.routes.js";
 import {
@@ -10,8 +11,9 @@ import userRoutes from "./src/user/routes/user.routes.js";
 import cookieParser from "cookie-parser";
 import orderRoutes from "./src/order/routes/order.routes.js";
 
-const configPath = path.resolve("backend", "config", "uat.env");
-dotenv.config({ path: configPath });
+// const configPath = path.resolve("backend", "config", "uat.env");
+// dotenv.config({ path: configPath });
+
 
 const app = express();
 app.use(express.json());
